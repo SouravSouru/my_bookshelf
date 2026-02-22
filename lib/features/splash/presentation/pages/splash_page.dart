@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 
@@ -11,149 +12,250 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
-  late AnimationController _fadeController;
-  late Animation<double> _fadeAnimation;
+  // Logo scale + fade
+  late AnimationController _logoController;
+  late Animation<double> _logoScale;
+  late Animation<double> _logoFade;
 
-  late AnimationController _slideController;
-  late Animation<Offset> _slideAnimation;
+  // Text slide up + fade
+  late AnimationController _textController;
+  late Animation<double> _textFade;
+  late Animation<Offset> _textSlide;
+
+  // Loading bar
+  late AnimationController _barController;
+  late Animation<double> _barProgress;
 
   @override
   void initState() {
     super.initState();
 
-    // Fade Controller for the background and initial elements
-    _fadeController = AnimationController(
+    // — Logo —
+    _logoController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 900),
     );
-
-    _fadeAnimation = Tween<double>(
+    _logoScale = Tween<double>(begin: 0.6, end: 1.0).animate(
+      CurvedAnimation(parent: _logoController, curve: Curves.easeOutBack),
+    );
+    _logoFade = Tween<double>(
       begin: 0.0,
       end: 1.0,
-    ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeIn));
+    ).animate(CurvedAnimation(parent: _logoController, curve: Curves.easeIn));
 
-    // Slide Controller for the text moving up slightly
-    _slideController = AnimationController(
+    // — Text (staggered, 400ms after logo) —
+    _textController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 700),
     );
-
-    _slideAnimation =
-        Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero).animate(
-          CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+    _textFade = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _textController, curve: Curves.easeIn));
+    _textSlide = Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero)
+        .animate(
+          CurvedAnimation(parent: _textController, curve: Curves.easeOutCubic),
         );
 
-    // Start animations staggeredly
-    _fadeController.forward();
-    Future.delayed(const Duration(milliseconds: 300), () {
-      if (mounted) _slideController.forward();
-    });
+    // — Progress bar (fills over 2.5s) —
+    _barController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2500),
+    );
+    _barProgress = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _barController, curve: Curves.easeInOut));
 
-    // Navigate to the next screen after a delay
-    Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) {
-        context.go('/home');
-      }
-    });
+    _startSequence();
+  }
+
+  Future<void> _startSequence() async {
+    _logoController.forward();
+    await Future.delayed(const Duration(milliseconds: 400));
+    if (mounted) _textController.forward();
+    await Future.delayed(const Duration(milliseconds: 200));
+    if (mounted) _barController.forward();
+    await Future.delayed(const Duration(milliseconds: 2600));
+    if (mounted) context.go('/login');
   }
 
   @override
   void dispose() {
-    _fadeController.dispose();
-    _slideController.dispose();
+    _logoController.dispose();
+    _textController.dispose();
+    _barController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primary,
+      backgroundColor: const Color(0xFF0E0A23),
       body: Stack(
         children: [
-          // Background gradient
-          Positioned.fill(
+          // ── Glow orb — top left ──────────────────────────────
+          Positioned(
+            top: -100,
+            left: -80,
             child: Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [AppColors.primary, AppColors.primaryDark],
+              width: 350,
+              height: 350,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    AppColors.primary.withValues(alpha: 0.5),
+                    AppColors.primary.withValues(alpha: 0),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          // ── Glow orb — bottom right ──────────────────────────
+          Positioned(
+            bottom: -80,
+            right: -80,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    const Color(0xFF7C3AED).withValues(alpha: 0.4),
+                    const Color(0xFF7C3AED).withValues(alpha: 0),
+                  ],
                 ),
               ),
             ),
           ),
 
+          // ── Content ──────────────────────────────────────────
           SafeArea(
-            child: Center(
-              child: FadeTransition(
-                opacity: _fadeAnimation,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Modern Glassmorphic / Minimal Icon Container
-                    Container(
-                      padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Spacer(flex: 3),
+
+                // — Logo —
+                ScaleTransition(
+                  scale: _logoScale,
+                  child: FadeTransition(
+                    opacity: _logoFade,
+                    child: Container(
+                      width: 104,
+                      height: 104,
                       decoration: BoxDecoration(
-                        color: AppColors.white.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(32),
+                        borderRadius: BorderRadius.circular(28),
+                        gradient: const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [AppColors.primary, Color(0xFF7C3AED)],
+                        ),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.primaryDark.withValues(alpha: 0.2),
-                            blurRadius: 30,
-                            offset: const Offset(0, 10),
+                            color: AppColors.primary.withValues(alpha: 0.55),
+                            blurRadius: 40,
+                            offset: const Offset(0, 16),
                           ),
                         ],
-                        border: Border.all(
-                          color: AppColors.white.withValues(alpha: 0.2),
-                          width: 1.5,
-                        ),
                       ),
                       child: const Icon(
                         Icons.auto_stories_rounded,
-                        size: 80,
-                        color: AppColors.white,
+                        color: Colors.white,
+                        size: 52,
                       ),
                     ),
-                    const SizedBox(height: 48),
+                  ),
+                ),
 
-                    // Slide up animated text
-                    SlideTransition(
-                      position: _slideAnimation,
-                      child: Column(
-                        children: [
-                          Text(
-                            'My BookShelf',
-                            style: AppTextStyles.headlineLarge.copyWith(
-                              color: AppColors.white,
-                              letterSpacing: 1.5,
-                              fontWeight: FontWeight.w800,
+                const SizedBox(height: 36),
+
+                // — App Name & Tagline —
+                FadeTransition(
+                  opacity: _textFade,
+                  child: SlideTransition(
+                    position: _textSlide,
+                    child: Column(
+                      children: [
+                        Text(
+                          'My BookShelf',
+                          style: AppTextStyles.headlineLarge.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 32,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: AppColors.primary.withValues(alpha: 0.3),
+                              width: 1,
                             ),
                           ),
-                          const SizedBox(height: 12),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 6,
+                          child: Text(
+                            'READING TRACKER',
+                            style: AppTextStyles.labelSmall.copyWith(
+                              color: Colors.white60,
+                              letterSpacing: 3.0,
+                              fontWeight: FontWeight.w700,
                             ),
-                            decoration: BoxDecoration(
-                              color: AppColors.white.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              'READING TRACKER',
-                              style: AppTextStyles.labelMedium.copyWith(
-                                color: AppColors.white.withValues(alpha: 0.9),
-                                letterSpacing: 3.0,
-                                fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const Spacer(flex: 3),
+
+                // — Progress bar at bottom —
+                FadeTransition(
+                  opacity: _textFade,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 56),
+                    child: Column(
+                      children: [
+                        AnimatedBuilder(
+                          animation: _barProgress,
+                          builder: (_, __) => ClipRRect(
+                            borderRadius: BorderRadius.circular(100),
+                            child: LinearProgressIndicator(
+                              value: _barProgress.value,
+                              minHeight: 2.5,
+                              backgroundColor: Colors.white.withValues(
+                                alpha: 0.08,
+                              ),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                AppColors.primary.withValues(alpha: 0.8),
                               ),
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Loading your library...',
+                          style: AppTextStyles.labelSmall.copyWith(
+                            color: Colors.white24,
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
+
+                const SizedBox(height: 48),
+              ],
             ),
           ),
         ],
