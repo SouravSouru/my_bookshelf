@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 // ─── Sample Data ──────────────────────────────────────────────────────────────
 
@@ -187,114 +188,138 @@ class _HomePageState extends State<HomePage> {
 
                     // Card 1: Full Image Cover Layout
                     if (book.isFullCoverCard) {
-                      return Container(
+                      return GestureDetector(
+                        onTap: () {
+                          context.push(
+                            '/home/book_details',
+                            extra: {
+                              'title': book.title,
+                              'author': book.author,
+                              'color': book.color,
+                            },
+                          );
+                        },
+                        child: Container(
+                          width: 170,
+                          decoration: BoxDecoration(
+                            color: book.color,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.1),
+                                blurRadius: 15,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
+                          ),
+                          padding: const EdgeInsets.all(16),
+                          child: const Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Center(
+                                child: Icon(
+                                  Icons.menu_book_rounded,
+                                  size: 48,
+                                  color: Colors.white24,
+                                ),
+                              ),
+                              Spacer(),
+                              Text(
+                                'FRANKENSTEIN',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+
+                    // Card 2: White Detailed Layout
+                    return GestureDetector(
+                      onTap: () {
+                        context.push(
+                          '/home/book_details',
+                          extra: {
+                            'title': book.title,
+                            'author': book.author,
+                            'color': book.color,
+                          },
+                        );
+                      },
+                      child: Container(
                         width: 170,
                         decoration: BoxDecoration(
-                          color: book.color,
+                          color: Colors.white,
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.1),
+                              color: Colors.black.withValues(alpha: 0.04),
                               blurRadius: 15,
                               offset: const Offset(0, 8),
                             ),
                           ],
                         ),
                         padding: const EdgeInsets.all(16),
-                        child: const Column(
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            Center(
-                              child: Icon(
-                                Icons.menu_book_rounded,
-                                size: 48,
-                                color: Colors.white24,
+                            Container(
+                              height: 90,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: book.color,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Center(
+                                child: Icon(
+                                  Icons.auto_stories_rounded,
+                                  color: Colors.white54,
+                                  size: 32,
+                                ),
                               ),
                             ),
-                            Spacer(),
+                            const SizedBox(height: 16),
                             Text(
-                              'FRANKENSTEIN',
+                              book.title,
                               style: TextStyle(
-                                color: Colors.white,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 18,
+                                color: textDark,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              book.author,
+                              style: TextStyle(color: textLight, fontSize: 13),
+                            ),
+                            const Spacer(),
+                            Text(
+                              '${(book.progress * 100).toInt()}% Read',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                                color: textDark,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(4),
+                              child: LinearProgressIndicator(
+                                value: book.progress,
+                                minHeight: 6,
+                                backgroundColor: const Color(0xFFEAEAEA),
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  primaryColor,
+                                ),
                               ),
                             ),
                           ],
                         ),
-                      );
-                    }
-
-                    // Card 2: White Detailed Layout
-                    return Container(
-                      width: 170,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.04),
-                            blurRadius: 15,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
-                      ),
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            height: 90,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: book.color,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Center(
-                              child: Icon(
-                                Icons.auto_stories_rounded,
-                                color: Colors.white54,
-                                size: 32,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            book.title,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                              color: textDark,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            book.author,
-                            style: TextStyle(color: textLight, fontSize: 13),
-                          ),
-                          const Spacer(),
-                          Text(
-                            '${(book.progress * 100).toInt()}% Read',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                              color: textDark,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: LinearProgressIndicator(
-                              value: book.progress,
-                              minHeight: 6,
-                              backgroundColor: const Color(0xFFEAEAEA),
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                primaryColor,
-                              ),
-                            ),
-                          ),
-                        ],
                       ),
                     );
                   },
@@ -321,72 +346,84 @@ class _HomePageState extends State<HomePage> {
                   separatorBuilder: (_, __) => const SizedBox(width: 16),
                   itemBuilder: (context, index) {
                     final book = _recentReleases[index];
-                    return Container(
-                      width: 125,
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.03),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Center(
-                            child: Container(
-                              height: 80,
-                              width: 56,
-                              decoration: BoxDecoration(
-                                color: book.color,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(
-                                Icons.book,
-                                color: Colors.white54,
-                                size: 24,
+                    return GestureDetector(
+                      onTap: () {
+                        context.push(
+                          '/home/book_details',
+                          extra: {
+                            'title': book.title,
+                            'author': book.author,
+                            'color': book.color,
+                          },
+                        );
+                      },
+                      child: Container(
+                        width: 125,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.03),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Center(
+                              child: Container(
+                                height: 80,
+                                width: 56,
+                                decoration: BoxDecoration(
+                                  color: book.color,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Icon(
+                                  Icons.book,
+                                  color: Colors.white54,
+                                  size: 24,
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            book.title,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 13,
-                              color: textDark,
-                              height: 1.2,
+                            const SizedBox(height: 12),
+                            Text(
+                              book.title,
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13,
+                                color: textDark,
+                                height: 1.2,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            book.author,
-                            style: TextStyle(color: textLight, fontSize: 11),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const Spacer(),
-                          Row(
-                            children: List.generate(5, (starIndex) {
-                              return Icon(
-                                Icons.star,
-                                size: 10,
-                                color: starIndex < book.rating
-                                    ? const Color(
-                                        0xFFD1D5DB,
-                                      ) // Light grey stars in reference
-                                    : Colors.transparent,
-                              );
-                            }),
-                          ),
-                        ],
+                            const SizedBox(height: 4),
+                            Text(
+                              book.author,
+                              style: TextStyle(color: textLight, fontSize: 11),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const Spacer(),
+                            Row(
+                              children: List.generate(5, (starIndex) {
+                                return Icon(
+                                  Icons.star,
+                                  size: 10,
+                                  color: starIndex < book.rating
+                                      ? const Color(
+                                          0xFFD1D5DB,
+                                        ) // Light grey stars in reference
+                                      : Colors.transparent,
+                                );
+                              }),
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },
@@ -410,58 +447,70 @@ class _HomePageState extends State<HomePage> {
                   separatorBuilder: (_, __) => const SizedBox(width: 16),
                   itemBuilder: (context, index) {
                     final book = _popularBooks[index];
-                    return Container(
-                      width: 135,
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.03),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Center(
-                            child: Container(
-                              height: 100,
-                              width: 70,
-                              decoration: BoxDecoration(
-                                color: book.color,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: const Icon(
-                                Icons.auto_stories_rounded,
-                                color: Colors.white54,
-                                size: 32,
+                    return GestureDetector(
+                      onTap: () {
+                        context.push(
+                          '/home/book_details',
+                          extra: {
+                            'title': book.title,
+                            'author': book.author,
+                            'color': book.color,
+                          },
+                        );
+                      },
+                      child: Container(
+                        width: 135,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.03),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Center(
+                              child: Container(
+                                height: 100,
+                                width: 70,
+                                decoration: BoxDecoration(
+                                  color: book.color,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: const Icon(
+                                  Icons.auto_stories_rounded,
+                                  color: Colors.white54,
+                                  size: 32,
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            book.title,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 14,
-                              color: textDark,
-                              height: 1.2,
+                            const SizedBox(height: 12),
+                            Text(
+                              book.title,
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14,
+                                color: textDark,
+                                height: 1.2,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            book.author,
-                            style: TextStyle(color: textLight, fontSize: 12),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+                            const SizedBox(height: 4),
+                            Text(
+                              book.author,
+                              style: TextStyle(color: textLight, fontSize: 12),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },
